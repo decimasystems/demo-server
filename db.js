@@ -47,7 +47,6 @@ function addCard(card, callback) {
                 return;
             }
             callback(card);
-            db.close();
         });
     });
 }

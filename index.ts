@@ -3,9 +3,11 @@ import * as  express from 'express';
 import * as bodyParser from 'body-parser';
 import * as db from "./db";
 import { IdentityCard } from './db'
+const cors = require('cors')
 const app = express();
 const server = http.createServer(app);
 app.use(bodyParser.json());
+app.use(cors());
 
 app.get('/cards', (req, res) => {
     db.getCards((vector: IdentityCard[]) => {

@@ -3,9 +3,11 @@ var http = require('http');
 var express = require("express");
 var bodyParser = require("body-parser");
 var db = require("./db");
+var cors = require('cors');
 var app = express();
 var server = http.createServer(app);
 app.use(bodyParser.json());
+app.use(cors());
 app.get('/cards', function (req, res) {
     db.getCards(function (vector) {
         res.json(vector);

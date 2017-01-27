@@ -67,7 +67,6 @@ export function addCard(card: IdentityCard, callback: (card: IdentityCard) => vo
                 return;
             }
             callback(card);
-            db.close();
         });
     });
 }
