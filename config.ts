@@ -1,0 +1,2 @@
+export const path: any = "./siruta.csv";
+export const properties: any = ['siruta', 'denumireLoc', 'codPostal', 'judet', 'SIRSUP', 'TIP', 'NIV', 'MED', 'REGIUNE', 'FSJ', 'FS2', 'FS3', 'FSL', 'Rang', 'fictiv'];

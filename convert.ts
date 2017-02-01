@@ -1,7 +1,7 @@
-var fs = require('fs');
+const fs = require('fs');
 export class Converter {
     csv2json(csvFilePath, properties, lineSeparator, valueSeparator, filtru: (item) => boolean, callback: (x) => void) {
-        var ret;
+
         lineSeparator = lineSeparator ? lineSeparator : /\r|\n/;
         valueSeparator = valueSeparator ? valueSeparator : ',';
 
@@ -31,15 +31,13 @@ export class Converter {
                     }
                 }
             }
-//            console.log("JSON: \n" + JSON.stringify(json));
+
             callback(json);
 
         });
 
 
-    }
-    suma(a, b) {
-        return a + b;
+
     }
 
 

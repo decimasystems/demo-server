@@ -85,7 +85,7 @@ export function updateCard(cnp: string, card: IdentityCard, callback: (card1: Id
         })
     })
 }
-export function deleteCard(cnp: string, callback: (cnp:string) => void) {
+export function deleteCard(cnp: string, callback: (cnp: string) => void) {
     db.collection('cards', (error, cards_collection) => {
         if (error) {
             console.error(error);

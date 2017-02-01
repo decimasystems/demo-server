@@ -12,6 +12,7 @@
     "mongodb": "^2.2.22"
   },
   "devDependencies": {
+    "@types/body-parser": "0.0.33",
     "@types/core-js": "^0.9.35",
     "@types/express": "^4.0.35",
     "@types/lodash": "^4.14.51",

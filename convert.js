@@ -4,7 +4,6 @@ var Converter = (function () {
     function Converter() {
     }
     Converter.prototype.csv2json = function (csvFilePath, properties, lineSeparator, valueSeparator, filtru, callback) {
-        var ret;
         lineSeparator = lineSeparator ? lineSeparator : /\r|\n/;
         valueSeparator = valueSeparator ? valueSeparator : ',';
         fs.readFile(csvFilePath, 'utf-8', function (err, data) {
@@ -32,12 +31,8 @@ var Converter = (function () {
                     }
                 }
             }
-            //            console.log("JSON: \n" + JSON.stringify(json));
             callback(json);
         });
-    };
-    Converter.prototype.suma = function (a, b) {
-        return a + b;
     };
     return Converter;
 }());
