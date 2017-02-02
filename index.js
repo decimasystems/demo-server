@@ -40,7 +40,7 @@ app.put('/cards/:cnp', function (req, res) {
 });
 app.get('/siruta/counties', function (req, res) {
     var vect = new convert_1.Converter();
-    vect.csv2json(config_1.path, config_1.properties, '\n', ';', function (item) {
+    vect.csv2json(config_1.sirutaPath, config_1.sirutaProperties, '\n', ';', function (item) {
         return item.TIP == '40';
     }, function (x) {
         var rez = [];
@@ -61,7 +61,7 @@ app.get('/siruta/counties', function (req, res) {
 });
 app.get('/siruta/counties/:id', function (req, res) {
     var vect = new convert_1.Converter();
-    vect.csv2json(config_1.path, config_1.properties, '\n', ';', function (item) {
+    vect.csv2json(config_1.sirutaPath, config_1.sirutaProperties, '\n', ';', function (item) {
         return (item.NIV == '3' || item.NIV == '2') && item.judet == req.params.id;
     }, function (x) {
         var rezultat = [];
@@ -81,6 +81,9 @@ app.get('/siruta/counties/:id', function (req, res) {
                     l.denumireLoc = denumire[1] + " " + denumire[2];
                     l.denumireLoc = titlecase_1.titleCase(l.denumireLoc) + " (" + l.denSup + ")";
                 }
+                else if (l.TIP == '10') {
+                    l.denumireLoc = titlecase_1.titleCase(l.denumireLoc) + " (" + l.denSup + ")";
+                }
                 else {
                     l.denumireLoc = "Sat " + titlecase_1.titleCase(l.denumireLoc) + " (" + l.denSup + ")";
                 }
@@ -89,6 +92,68 @@ app.get('/siruta/counties/:id', function (req, res) {
         }
         rezultat = _.sortBy(rezultat, ['denSup', 'denumireLoc']);
         return res.json(rezultat);
+    });
+});
+app.get('/companies/:id', function (req, res) {
+    var vect = new convert_1.Converter();
+    var jud;
+    var company;
+    var filter = function (item) {
+        return item.CUI == req.params.id;
+    };
+    Promise.all([vect.csv2jsonPromise(config_1.companiesPath, config_1.companiesProperties, null, '|', filter),
+        vect.csv2jsonPromise(config_1.companiesPath2, config_1.companiesProperties, null, '|', filter)])
+        .then(function (json) {
+        var e = json[0].concat(json[1]);
+        return e[0];
+    })
+        .then(function (json) {
+        company = json;
+        return vect.csv2jsonPromise(config_1.sirutaPath, config_1.sirutaProperties, null, null, function (item) {
+            return (convert_1.accentsTidy(item.denumireLoc).match(convert_1.accentsTidy(json.JUDET)) && item.NIV == "1") ||
+                (convert_1.accentsTidy(item.denumireLoc).match(convert_1.accentsTidy(json.LOCALITATE)));
+        });
+    }).then(function (uats) {
+        for (var _i = 0, uats_1 = uats; _i < uats_1.length; _i++) {
+            var uat = uats_1[_i];
+            if (convert_1.accentsTidy(uat.denumireLoc).match(convert_1.accentsTidy(company.JUDET)) && uat.TIP == "40") {
+                company.sirutaJudet = uat.siruta;
+            }
+            else if (convert_1.accentsTidy(uat.denumireLoc).match(convert_1.accentsTidy(company.LOCALITATE))) {
+                company.sirutaLocalitate = uat.siruta;
+            }
+        }
+        res.json(company);
+    }, function (err) {
+        res.json(err);
+    });
+});
+app.get('/firme/:name', function (req, res) {
+    var vect = new convert_1.Converter();
+    Promise.all([vect.csv2jsonPromise(config_1.companiesPath, config_1.companiesProperties, null, '|', function (item) {
+            return item.DENUMIRE.match(req.params.name) ? true : false;
+        }), vect.csv2jsonPromise(config_1.companiesPath2, config_1.companiesProperties, null, '|', function (item) {
+            return item.DENUMIRE.match(req.params.name) ? true : false;
+        })
+    ])
+        .then(function (json) {
+        res.json(json);
+    }, function (err) {
+        res.json(err);
+    });
+});
+app.get('/comp/:oras', function (req, res) {
+    var vect = new convert_1.Converter();
+    Promise.all([vect.csv2jsonPromise(config_1.companiesPath, config_1.companiesProperties, null, '|', function (item) {
+            return item.JUDET.match(req.params.oras) ? true : false;
+        }), vect.csv2jsonPromise(config_1.companiesPath2, config_1.companiesProperties, null, '|', function (item) {
+            return item.JUDET.match(req.params.oras) ? true : false;
+        })
+    ])
+        .then(function (json) {
+        res.json(json);
+    }, function (err) {
+        res.json(err);
     });
 });
 server.listen(4000, function () {

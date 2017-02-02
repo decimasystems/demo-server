@@ -15,13 +15,14 @@ var Converter = (function () {
             var json = [];
             if (csv) {
                 var lines = csv.split(lineSeparator);
-                for (var i = 0; i < lines.length; i++) {
+                for (var i = 1; i < lines.length; i++) {
                     var jsonVal = {};
                     var line = lines[i];
                     if (line) {
                         var values = line.split(valueSeparator);
                         for (var j = 0; j < properties.length; j++) {
                             var valKey = properties[j];
+                            values[j] = values[j].replace(/["]/g, '');
                             var val = values[j] ? values[j] : '';
                             jsonVal[valKey] = values[j];
                         }
@@ -34,7 +35,59 @@ var Converter = (function () {
             callback(json);
         });
     };
+    Converter.prototype.csv2jsonPromise = function (csvFilePath, properties, lineSeparator, valueSeparator, callback) {
+        if (callback === void 0) { callback = null; }
+        lineSeparator = lineSeparator ? lineSeparator : /\r|\n/;
+        valueSeparator = valueSeparator ? valueSeparator : ';';
+        return this.readFilePromise(csvFilePath, 'utf-8').then(function (csv) {
+            var json = [];
+            if (csv) {
+                var lines = csv.split(lineSeparator);
+                for (var i = 0; i < lines.length; i++) {
+                    var jsonVal = {};
+                    var line = lines[i];
+                    if (line) {
+                        var values = line.split(valueSeparator);
+                        for (var j = 0; j < properties.length; j++) {
+                            var valKey = properties[j];
+                            if ((/["]/g).test(values[j])) {
+                                values[j] = values[j].replace(/["]/g, '');
+                            }
+                            var val = values[j] ? values[j] : '';
+                            jsonVal[valKey] = values[j];
+                        }
+                        if (callback && callback(jsonVal)) {
+                            json.push(jsonVal);
+                        }
+                    }
+                }
+            }
+            return json;
+        }, function (err) {
+            throw err;
+        });
+    };
+    Converter.prototype.readFilePromise = function (filename, encoding) {
+        return new Promise(function (resolve, reject) {
+            fs.readFile(filename, encoding, function (err, data) {
+                if (err)
+                    reject(err);
+                else
+                    resolve(data);
+            });
+        });
+    };
+    ;
     return Converter;
 }());
 exports.Converter = Converter;
+function accentsTidy(s) {
+    var r = s.toLowerCase();
+    r = r.replace(new RegExp(/[âăî]/g), "a");
+    r = r.replace(new RegExp(/[şşș]/g), "s");
+    r = r.replace(new RegExp(/[ț]/g), "t");
+    return r;
+}
+exports.accentsTidy = accentsTidy;
+;
 //# sourceMappingURL=convert.js.map

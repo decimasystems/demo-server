@@ -17,7 +17,7 @@ export interface IdentityCard {
     street?: string;
     streetNr: number;
     block?: number;
-    scale?: string;
+    entrance?: string;
     floor?: number;
     apartament?: number;
     issued: string;
