@@ -84,7 +84,7 @@ export class Converter {
     };
     writeFilePromise(filename, data) {
         return new Promise((resolve, reject) => {
-            fs.writeJson(filename, data, (err) => {
+            fs.writeFile(filename, data, (err) => {
                 if (err)
                     reject(err);
                 else

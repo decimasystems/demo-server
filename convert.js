@@ -81,7 +81,7 @@ var Converter = (function () {
     ;
     Converter.prototype.writeFilePromise = function (filename, data) {
         return new Promise(function (resolve, reject) {
-            fs.writeJson(filename, data, function (err) {
+            fs.writeFile(filename, data, function (err) {
                 if (err)
                     reject(err);
                 else

@@ -9,10 +9,12 @@ var convert_1 = require("./convert");
 var titlecase_1 = require("./titlecase");
 var config_1 = require("./config");
 var binarySearch_1 = require("./binarySearch");
+var data_1 = require("./data");
 var cors = require('cors');
 var app = express();
 var server = http.createServer(app);
 var firme1, firme2, siruta, firme, indexCUI, indexDenumire, file1, file2;
+var vect = new convert_1.Converter();
 app.use(bodyParser.json());
 app.use(cors());
 app.get('/cards', function (req, res) {
@@ -96,46 +98,37 @@ app.get('/siruta/counties/:id', function (req, res) {
         return res.json(rezultat);
     });
 });
+app.get('/data', function (req, res) {
+    data_1.importCompanies(function (y) {
+        firme = y;
+    }, function (x) {
+        file1 = JSON.parse(x);
+    });
+});
 app.get('/companies/:id', function (req, res) {
     var vect = new convert_1.Converter();
-    var jud;
     var company;
     var indexCUI, indexDenumire;
-    var r;
-    Promise.resolve(file1)
-        .then(function (json) {
-        return JSON.parse(json);
-    }).then(function (indexCUI) {
-        return binarySearch_1.binarySearch(indexCUI, req.params.id);
-    }).then(function (x) {
-        return firme[x];
-    }).then(function (json) {
-        company = json;
-        return siruta;
-    }).then(function (siruta) {
-        var rez = [];
-        for (var _i = 0, siruta_1 = siruta; _i < siruta_1.length; _i++) {
-            var s = siruta_1[_i];
-            if ((convert_1.accentsTidy(s.denumireLoc).match(convert_1.accentsTidy(company.JUDET)) && s.NIV == "1")
-                || (convert_1.accentsTidy(s.denumireLoc).match(convert_1.accentsTidy(company.LOCALITATE)))) {
-                rez.push(s);
-            }
+    var x = binarySearch_1.binarySearch(file1, req.params.id);
+    company = firme[x];
+    var uats = [];
+    for (var _i = 0, siruta_1 = siruta; _i < siruta_1.length; _i++) {
+        var s = siruta_1[_i];
+        if ((convert_1.accentsTidy(s.denumireLoc).match(convert_1.accentsTidy(company.JUDET)) && s.NIV == "1")
+            || (convert_1.accentsTidy(s.denumireLoc).match(convert_1.accentsTidy(company.LOCALITATE)))) {
+            uats.push(s);
         }
-        return rez;
-    }).then(function (uats) {
-        for (var _i = 0, uats_1 = uats; _i < uats_1.length; _i++) {
-            var uat = uats_1[_i];
-            if (convert_1.accentsTidy(uat.denumireLoc).match(convert_1.accentsTidy(company.JUDET)) && uat.TIP == "40") {
-                company.sirutaJudet = uat.siruta;
-            }
-            else if (convert_1.accentsTidy(uat.denumireLoc).match(convert_1.accentsTidy(company.LOCALITATE))) {
-                company.sirutaLocalitate = uat.siruta;
-            }
+    }
+    for (var _a = 0, uats_1 = uats; _a < uats_1.length; _a++) {
+        var uat = uats_1[_a];
+        if (convert_1.accentsTidy(uat.denumireLoc).match(convert_1.accentsTidy(company.JUDET)) && uat.TIP == "40") {
+            company.sirutaJudet = uat.siruta;
         }
-        res.json(company);
-    }, function (err) {
-        res.json(err);
-    });
+        else if (convert_1.accentsTidy(uat.denumireLoc).match(convert_1.accentsTidy(company.LOCALITATE))) {
+            company.sirutaLocalitate = uat.siruta;
+        }
+    }
+    res.json(company);
 });
 app.get('/firme/:name', function (req, res) {
     var vect = new convert_1.Converter();
@@ -167,35 +160,9 @@ app.get('/comp/:oras', function (req, res) {
 });
 server.listen(4000, function () {
     console.log('rest service running on port 4000');
-    var vect = new convert_1.Converter();
     var filter = function (item) {
         return true;
     };
-    indexCUI = [];
-    indexDenumire = [];
-    firme1 = vect.csv2jsonPromise(config_1.companiesPath, config_1.companiesProperties, null, '|', filter);
-    firme2 = vect.csv2jsonPromise(config_1.companiesPath2, config_1.companiesProperties, null, '|', filter);
-    Promise.all([firme1, firme2])
-        .then(function (json) {
-        firme = json[0].concat(json[1]);
-        for (var i = 0; i < firme.length; i++) {
-            indexCUI.push({ index: i, CUI: firme[i].CUI });
-            indexDenumire.push({ index: i, denumire: firme[i].DENUMIRE });
-        }
-        indexCUI = _.sortBy(indexCUI, ['CUI']);
-        indexDenumire = _.sortBy(indexDenumire, ['denumire']);
-        return indexCUI;
-    }).then(function (indexCUI) {
-        vect.writeFilePromise('./indexCui.json', JSON.stringify(indexCUI));
-        vect.writeFilePromise('./indexDenumire.json', JSON.stringify(indexDenumire));
-    }).then(function () {
-        file1 = vect.readFilePromise('./indexCui.json', 'utf-8');
-    });
-    /*Promise.all([vect.writeFilePromise('./indexCui.json', JSON.stringify(indexCUI)),
-             vect.writeFilePromise('./indexDenumire.json', JSON.stringify(indexDenumire))])
-        .then(() => {
-            file1 = vect.readFilePromise('./indexCui.json', 'utf-8')
-        })*/
     siruta = vect.csv2jsonPromise(config_1.sirutaPath, config_1.sirutaProperties, null, null, filter).then(function (json) {
         return json;
     });
