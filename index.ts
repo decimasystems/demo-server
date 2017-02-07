@@ -12,24 +12,9 @@ import { binarySearch } from './binarySearch';
 const cors = require('cors')
 const app = express();
 const server = http.createServer(app);
-app.set('json spaces', 4);
+var firme1, firme2, siruta, firme, indexCUI, indexDenumire, file1, file2;
 app.use(bodyParser.json());
 app.use(cors());
-var vect = new Converter();
-var filter = (item) => {
-    return true;
-}
-var firme1, firme2;
-vect.csv2jsonPromise(companiesPath, companiesProperties, null, '|', filter).then((json) => {
-    firme1 = json;
-});
-vect.csv2jsonPromise(companiesPath2, companiesProperties, null, '|', filter).then((json) => {
-    firme2 = json;
-})
-var siruta = vect.csv2jsonPromise(sirutaPath, sirutaProperties, null, null, filter).then((json) => {
-    return json;
-});
-
 app.get('/cards', (req, res) => {
     db.getCards((vector: IdentityCard[]) => {
         res.json(vector);
@@ -120,58 +105,40 @@ app.get('/companies/:id', (req, res) => {
     var company;
     var indexCUI, indexDenumire;
     var r;
-    Promise.all([firme1, firme2])
+    Promise.resolve(file1)
         .then((json) => {
-            indexCUI = [];
-            indexDenumire = [];
-            r = json[0].concat(json[1]);
-            for (var i = 0; i < r.length; i++) {
-                indexCUI.push({ index: i, CUI: r[i].CUI });
-                indexDenumire.push({ index: i, denumire: r[i].DENUMIRE });
+
+            return JSON.parse(json);
+        
+        }).then((indexCUI: any) => {
+        return binarySearch(indexCUI, req.params.id);
+    }).then((x) => {
+        return firme[x];
+    }).then((json: any) => {
+        company = json;
+        return siruta;
+    }).then((siruta) => {
+        var rez = [];
+        for (let s of siruta) {
+            if ((accentsTidy(s.denumireLoc).match(accentsTidy(company.JUDET)) && s.NIV == "1")
+                || (accentsTidy(s.denumireLoc).match(accentsTidy(company.LOCALITATE)))) {
+                rez.push(s);
             }
-            /*indexCUI.sort((a, b) => {
-                if (a.CUI > b.CUI)
-                    return 1;
-                if (a.CUI < b.CUI)
-                    return -1;
-                return 0;
-            })*/
-            indexCUI = _.sortBy(indexCUI, ['CUI']);
-            indexDenumire = _.sortBy(indexDenumire, ['denumire']);
-            return indexCUI;
-        }).then((indexCUI) => {
-            vect.writeFilePromise('./indexCui.json', indexCUI);
-            vect.writeFilePromise('./indexDenumire.json', indexDenumire);
-            return indexCUI;
-        }).then((indexCUI) => {
-            return binarySearch(indexCUI, req.params.id);
-        }).then((x) => {
-            return r[x];
-        }).then((json: any) => {
-            company = json;
-            return siruta;
-        }).then((siruta) => {
-            var rez = [];
-            for (let s of siruta) {
-                if ((accentsTidy(s.denumireLoc).match(accentsTidy(company.JUDET)) && s.NIV == "1")
-                    || (accentsTidy(s.denumireLoc).match(accentsTidy(company.LOCALITATE)))) {
-                    rez.push(s);
-                }
+        }
+        return rez;
+    }).then((uats) => {
+        for (let uat of uats) {
+            if (accentsTidy(uat.denumireLoc).match(accentsTidy(company.JUDET)) && uat.TIP == "40") {
+                company.sirutaJudet = uat.siruta;
             }
-            return rez;
-        }).then((uats) => {
-            for (let uat of uats) {
-                if (accentsTidy(uat.denumireLoc).match(accentsTidy(company.JUDET)) && uat.TIP == "40") {
-                    company.sirutaJudet = uat.siruta;
-                }
-                else if (accentsTidy(uat.denumireLoc).match(accentsTidy(company.LOCALITATE))) {
-                    company.sirutaLocalitate = uat.siruta;
-                }
+            else if (accentsTidy(uat.denumireLoc).match(accentsTidy(company.LOCALITATE))) {
+                company.sirutaLocalitate = uat.siruta;
             }
-            res.json(company);
-        }, (err) => {
-            res.json(err);
-        })
+        }
+        res.json(company);
+    }, (err) => {
+        res.json(err);
+    })
 
 });
 app.get('/firme/:name', (req, res) => {
@@ -207,5 +174,40 @@ app.get('/comp/:oras', (req, res) => {
 })
 server.listen(4000, () => {
     console.log('rest service running on port 4000');
+    var vect = new Converter();
+    var filter = (item) => {
+        return true;
+    }
+    indexCUI = [];
+    indexDenumire = [];
+    firme1= vect.csv2jsonPromise(companiesPath, companiesProperties, null, '|', filter);
+    firme2 = vect.csv2jsonPromise(companiesPath2, companiesProperties, null, '|', filter);
+    Promise.all([firme1,firme2])
+        .then((json) => {
+            firme = json[0].concat(json[1]);
+            for (var i = 0; i < firme.length; i++) {
+                indexCUI.push({ index: i, CUI: firme[i].CUI });
+                indexDenumire.push({ index: i, denumire: firme[i].DENUMIRE });
+            }
+            indexCUI = _.sortBy(indexCUI, ['CUI']);
+            indexDenumire = _.sortBy(indexDenumire, ['denumire']);
+            return indexCUI;
+        }).then((indexCUI)=>{
+            vect.writeFilePromise('./indexCui.json', JSON.stringify(indexCUI));
+            vect.writeFilePromise('./indexDenumire.json', JSON.stringify(indexDenumire))
+        }).then(()=>{
+            file1 = vect.readFilePromise('./indexCui.json', 'utf-8');
+        });
+    /*Promise.all([vect.writeFilePromise('./indexCui.json', JSON.stringify(indexCUI)),
+             vect.writeFilePromise('./indexDenumire.json', JSON.stringify(indexDenumire))])
+        .then(() => {
+            file1 = vect.readFilePromise('./indexCui.json', 'utf-8')
+        })*/
+    siruta = vect.csv2jsonPromise(sirutaPath, sirutaProperties, null, null, filter).then((json) => {
+        return json;
+    });
+
+
+
 })
 

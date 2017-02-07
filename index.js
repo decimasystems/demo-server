@@ -12,23 +12,9 @@ var binarySearch_1 = require("./binarySearch");
 var cors = require('cors');
 var app = express();
 var server = http.createServer(app);
-app.set('json spaces', 4);
+var firme1, firme2, siruta, firme, indexCUI, indexDenumire, file1, file2;
 app.use(bodyParser.json());
 app.use(cors());
-var vect = new convert_1.Converter();
-var filter = function (item) {
-    return true;
-};
-var firme1, firme2;
-vect.csv2jsonPromise(config_1.companiesPath, config_1.companiesProperties, null, '|', filter).then(function (json) {
-    firme1 = json;
-});
-vect.csv2jsonPromise(config_1.companiesPath2, config_1.companiesProperties, null, '|', filter).then(function (json) {
-    firme2 = json;
-});
-var siruta = vect.csv2jsonPromise(config_1.sirutaPath, config_1.sirutaProperties, null, null, filter).then(function (json) {
-    return json;
-});
 app.get('/cards', function (req, res) {
     db.getCards(function (vector) {
         res.json(vector);
@@ -116,33 +102,13 @@ app.get('/companies/:id', function (req, res) {
     var company;
     var indexCUI, indexDenumire;
     var r;
-    Promise.all([firme1, firme2])
+    Promise.resolve(file1)
         .then(function (json) {
-        indexCUI = [];
-        indexDenumire = [];
-        r = json[0].concat(json[1]);
-        for (var i = 0; i < r.length; i++) {
-            indexCUI.push({ index: i, CUI: r[i].CUI });
-            indexDenumire.push({ index: i, denumire: r[i].DENUMIRE });
-        }
-        /*indexCUI.sort((a, b) => {
-            if (a.CUI > b.CUI)
-                return 1;
-            if (a.CUI < b.CUI)
-                return -1;
-            return 0;
-        })*/
-        indexCUI = _.sortBy(indexCUI, ['CUI']);
-        indexDenumire = _.sortBy(indexDenumire, ['denumire']);
-        return indexCUI;
-    }).then(function (indexCUI) {
-        vect.writeFilePromise('./indexCui.json', indexCUI);
-        vect.writeFilePromise('./indexDenumire.json', indexDenumire);
-        return indexCUI;
+        return JSON.parse(json);
     }).then(function (indexCUI) {
         return binarySearch_1.binarySearch(indexCUI, req.params.id);
     }).then(function (x) {
-        return r[x];
+        return firme[x];
     }).then(function (json) {
         company = json;
         return siruta;
@@ -201,5 +167,37 @@ app.get('/comp/:oras', function (req, res) {
 });
 server.listen(4000, function () {
     console.log('rest service running on port 4000');
+    var vect = new convert_1.Converter();
+    var filter = function (item) {
+        return true;
+    };
+    indexCUI = [];
+    indexDenumire = [];
+    firme1 = vect.csv2jsonPromise(config_1.companiesPath, config_1.companiesProperties, null, '|', filter);
+    firme2 = vect.csv2jsonPromise(config_1.companiesPath2, config_1.companiesProperties, null, '|', filter);
+    Promise.all([firme1, firme2])
+        .then(function (json) {
+        firme = json[0].concat(json[1]);
+        for (var i = 0; i < firme.length; i++) {
+            indexCUI.push({ index: i, CUI: firme[i].CUI });
+            indexDenumire.push({ index: i, denumire: firme[i].DENUMIRE });
+        }
+        indexCUI = _.sortBy(indexCUI, ['CUI']);
+        indexDenumire = _.sortBy(indexDenumire, ['denumire']);
+        return indexCUI;
+    }).then(function (indexCUI) {
+        vect.writeFilePromise('./indexCui.json', JSON.stringify(indexCUI));
+        vect.writeFilePromise('./indexDenumire.json', JSON.stringify(indexDenumire));
+    }).then(function () {
+        file1 = vect.readFilePromise('./indexCui.json', 'utf-8');
+    });
+    /*Promise.all([vect.writeFilePromise('./indexCui.json', JSON.stringify(indexCUI)),
+             vect.writeFilePromise('./indexDenumire.json', JSON.stringify(indexDenumire))])
+        .then(() => {
+            file1 = vect.readFilePromise('./indexCui.json', 'utf-8')
+        })*/
+    siruta = vect.csv2jsonPromise(config_1.sirutaPath, config_1.sirutaProperties, null, null, filter).then(function (json) {
+        return json;
+    });
 });
 //# sourceMappingURL=index.js.map
