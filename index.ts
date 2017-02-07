@@ -3,16 +3,32 @@ import * as  express from 'express';
 import * as bodyParser from 'body-parser';
 import * as db from "./db";
 import * as _ from 'lodash';
+const fs = require('fs');
 import { IdentityCard } from './db'
-import { Converter,accentsTidy } from './convert';
+import { Converter, accentsTidy } from './convert';
 import { titleCase } from './titlecase';
 import { sirutaPath, sirutaProperties, companiesPath, companiesPath2, companiesProperties } from './config';
+import { binarySearch } from './binarySearch';
 const cors = require('cors')
 const app = express();
 const server = http.createServer(app);
 app.set('json spaces', 4);
 app.use(bodyParser.json());
 app.use(cors());
+var vect = new Converter();
+var filter = (item) => {
+    return true;
+}
+var firme1, firme2;
+vect.csv2jsonPromise(companiesPath, companiesProperties, null, '|', filter).then((json) => {
+    firme1 = json;
+});
+vect.csv2jsonPromise(companiesPath2, companiesProperties, null, '|', filter).then((json) => {
+    firme2 = json;
+})
+var siruta = vect.csv2jsonPromise(sirutaPath, sirutaProperties, null, null, filter).then((json) => {
+    return json;
+});
 
 app.get('/cards', (req, res) => {
     db.getCards((vector: IdentityCard[]) => {
@@ -102,29 +118,53 @@ app.get('/companies/:id', (req, res) => {
     var vect = new Converter();
     var jud;
     var company;
-    var filter = (item) => {
-        return item.CUI == req.params.id;
-    }
-    Promise.all([vect.csv2jsonPromise(companiesPath, companiesProperties, null, '|', filter),
-    vect.csv2jsonPromise(companiesPath2, companiesProperties, null, '|', filter)])
-        .then((json: any) => {
-            var e = json[0].concat(json[1]);
-            return e[0];
-        })
-        .then((json: any) => {
+    var indexCUI, indexDenumire;
+    var r;
+    Promise.all([firme1, firme2])
+        .then((json) => {
+            indexCUI = [];
+            indexDenumire = [];
+            r = json[0].concat(json[1]);
+            for (var i = 0; i < r.length; i++) {
+                indexCUI.push({ index: i, CUI: r[i].CUI });
+                indexDenumire.push({ index: i, denumire: r[i].DENUMIRE });
+            }
+            /*indexCUI.sort((a, b) => {
+                if (a.CUI > b.CUI)
+                    return 1;
+                if (a.CUI < b.CUI)
+                    return -1;
+                return 0;
+            })*/
+            indexCUI = _.sortBy(indexCUI, ['CUI']);
+            indexDenumire = _.sortBy(indexDenumire, ['denumire']);
+            return indexCUI;
+        }).then((indexCUI) => {
+            vect.writeFilePromise('./indexCui.json', indexCUI);
+            vect.writeFilePromise('./indexDenumire.json', indexDenumire);
+            return indexCUI;
+        }).then((indexCUI) => {
+            return binarySearch(indexCUI, req.params.id);
+        }).then((x) => {
+            return r[x];
+        }).then((json: any) => {
             company = json;
-            return vect.csv2jsonPromise(sirutaPath, sirutaProperties, null, null, (item) => {
-
-                return (accentsTidy(item.denumireLoc).match(accentsTidy(json.JUDET)) && item.NIV=="1")||
-                    (accentsTidy(item.denumireLoc).match(accentsTidy(json.LOCALITATE)));
-            })
-
+            return siruta;
+        }).then((siruta) => {
+            var rez = [];
+            for (let s of siruta) {
+                if ((accentsTidy(s.denumireLoc).match(accentsTidy(company.JUDET)) && s.NIV == "1")
+                    || (accentsTidy(s.denumireLoc).match(accentsTidy(company.LOCALITATE)))) {
+                    rez.push(s);
+                }
+            }
+            return rez;
         }).then((uats) => {
             for (let uat of uats) {
                 if (accentsTidy(uat.denumireLoc).match(accentsTidy(company.JUDET)) && uat.TIP == "40") {
                     company.sirutaJudet = uat.siruta;
                 }
-               else if (accentsTidy(uat.denumireLoc).match(accentsTidy(company.LOCALITATE))) {
+                else if (accentsTidy(uat.denumireLoc).match(accentsTidy(company.LOCALITATE))) {
                     company.sirutaLocalitate = uat.siruta;
                 }
             }

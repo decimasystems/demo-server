@@ -1,4 +1,5 @@
-const fs = require('fs');
+//const fs = require('fs');
+import * as fs from 'fs-extra';
 export class Converter {
     csv2json(csvFilePath, properties, lineSeparator, valueSeparator, filtru: (item) => boolean, callback: (x) => void) {
 
@@ -81,6 +82,17 @@ export class Converter {
             });
         });
     };
+    writeFilePromise(filename, data) {
+        return new Promise((resolve, reject) => {
+            fs.writeJson(filename, data, (err) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve();
+            })
+        })
+
+    }
 }
 export function accentsTidy(s) {
     var r = s.toLowerCase();

@@ -1,5 +1,6 @@
 "use strict";
-var fs = require('fs');
+//const fs = require('fs');
+var fs = require("fs-extra");
 var Converter = (function () {
     function Converter() {
     }
@@ -78,6 +79,16 @@ var Converter = (function () {
         });
     };
     ;
+    Converter.prototype.writeFilePromise = function (filename, data) {
+        return new Promise(function (resolve, reject) {
+            fs.writeJson(filename, data, function (err) {
+                if (err)
+                    reject(err);
+                else
+                    resolve();
+            });
+        });
+    };
     return Converter;
 }());
 exports.Converter = Converter;

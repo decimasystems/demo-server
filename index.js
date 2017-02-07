@@ -4,15 +4,31 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var db = require("./db");
 var _ = require("lodash");
+var fs = require('fs');
 var convert_1 = require("./convert");
 var titlecase_1 = require("./titlecase");
 var config_1 = require("./config");
+var binarySearch_1 = require("./binarySearch");
 var cors = require('cors');
 var app = express();
 var server = http.createServer(app);
 app.set('json spaces', 4);
 app.use(bodyParser.json());
 app.use(cors());
+var vect = new convert_1.Converter();
+var filter = function (item) {
+    return true;
+};
+var firme1, firme2;
+vect.csv2jsonPromise(config_1.companiesPath, config_1.companiesProperties, null, '|', filter).then(function (json) {
+    firme1 = json;
+});
+vect.csv2jsonPromise(config_1.companiesPath2, config_1.companiesProperties, null, '|', filter).then(function (json) {
+    firme2 = json;
+});
+var siruta = vect.csv2jsonPromise(config_1.sirutaPath, config_1.sirutaProperties, null, null, filter).then(function (json) {
+    return json;
+});
 app.get('/cards', function (req, res) {
     db.getCards(function (vector) {
         res.json(vector);
@@ -98,21 +114,48 @@ app.get('/companies/:id', function (req, res) {
     var vect = new convert_1.Converter();
     var jud;
     var company;
-    var filter = function (item) {
-        return item.CUI == req.params.id;
-    };
-    Promise.all([vect.csv2jsonPromise(config_1.companiesPath, config_1.companiesProperties, null, '|', filter),
-        vect.csv2jsonPromise(config_1.companiesPath2, config_1.companiesProperties, null, '|', filter)])
+    var indexCUI, indexDenumire;
+    var r;
+    Promise.all([firme1, firme2])
         .then(function (json) {
-        var e = json[0].concat(json[1]);
-        return e[0];
-    })
-        .then(function (json) {
+        indexCUI = [];
+        indexDenumire = [];
+        r = json[0].concat(json[1]);
+        for (var i = 0; i < r.length; i++) {
+            indexCUI.push({ index: i, CUI: r[i].CUI });
+            indexDenumire.push({ index: i, denumire: r[i].DENUMIRE });
+        }
+        /*indexCUI.sort((a, b) => {
+            if (a.CUI > b.CUI)
+                return 1;
+            if (a.CUI < b.CUI)
+                return -1;
+            return 0;
+        })*/
+        indexCUI = _.sortBy(indexCUI, ['CUI']);
+        indexDenumire = _.sortBy(indexDenumire, ['denumire']);
+        return indexCUI;
+    }).then(function (indexCUI) {
+        vect.writeFilePromise('./indexCui.json', indexCUI);
+        vect.writeFilePromise('./indexDenumire.json', indexDenumire);
+        return indexCUI;
+    }).then(function (indexCUI) {
+        return binarySearch_1.binarySearch(indexCUI, req.params.id);
+    }).then(function (x) {
+        return r[x];
+    }).then(function (json) {
         company = json;
-        return vect.csv2jsonPromise(config_1.sirutaPath, config_1.sirutaProperties, null, null, function (item) {
-            return (convert_1.accentsTidy(item.denumireLoc).match(convert_1.accentsTidy(json.JUDET)) && item.NIV == "1") ||
-                (convert_1.accentsTidy(item.denumireLoc).match(convert_1.accentsTidy(json.LOCALITATE)));
-        });
+        return siruta;
+    }).then(function (siruta) {
+        var rez = [];
+        for (var _i = 0, siruta_1 = siruta; _i < siruta_1.length; _i++) {
+            var s = siruta_1[_i];
+            if ((convert_1.accentsTidy(s.denumireLoc).match(convert_1.accentsTidy(company.JUDET)) && s.NIV == "1")
+                || (convert_1.accentsTidy(s.denumireLoc).match(convert_1.accentsTidy(company.LOCALITATE)))) {
+                rez.push(s);
+            }
+        }
+        return rez;
     }).then(function (uats) {
         for (var _i = 0, uats_1 = uats; _i < uats_1.length; _i++) {
             var uat = uats_1[_i];
