@@ -4,6 +4,7 @@ export function binarySearch(indexCUI, searchElement) {
         max = indexCUI.length;
         min = 0;
    // }
+   //TODO: verify that the value really exists in the array !!
     while (min < max) {
         middle = Math.round((max + min) / 2)
         if (searchElement < indexCUI[middle]["CUI"]) {

@@ -1,29 +1,30 @@
-const http = require('http');
-import * as  express from 'express';
+import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as db from "./db";
 import * as _ from 'lodash';
-const fs = require('fs');
+
 import * as cardRouter from './cardRouter';
 import * as sirutaRouter from './sirutaRouter';
-import * as companyRouter from './companyRouter';
+import {companyRouter} from './companyRouter';
 
 import { importCompanies } from './data';
 import { binarySearch } from './binarySearch';
 import { accentsTidy } from './convert';
-const cors = require('cors')
-const app = express() as any;
-const server = http.createServer(app)
+import * as cors from 'cors';
 import { Converter } from './convert';
- var vect = new Converter();
- var firme,file1,siruta;
-var routes=require('./routes')
+
+const app = express();
+
 app.use(bodyParser.json());
 app.use(cors());
-app.all('*',()=>{
-    console.log("All express")
+
+app.all('*',(request: express.Request, response: express.Response, next: express.NextFunction)=>{
+    console.log("All express");
+    next();
 })
-app.use('/api',routes);
+
+app.use("/company", companyRouter);
+
 /*app.use("/cards", cardRouter);
 app.use("/siruta", sirutaRouter);
 app.use('/company',companyRouter );*/
@@ -69,7 +70,8 @@ app.get('/companies/:id', (req, res) => {
         }
         res.json(company)
     })*/
-server.listen(4000, () => {
+
+const server = app.listen(4000, () => {
     console.log('rest service running on port 4000')
 })
 

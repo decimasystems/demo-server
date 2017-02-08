@@ -93,11 +93,14 @@ var Converter = (function () {
 }());
 exports.Converter = Converter;
 function accentsTidy(s) {
-    var r = s.toLowerCase();
-    r = r.replace(new RegExp(/[âăî]/g), "a");
-    r = r.replace(new RegExp(/[şşș]/g), "s");
-    r = r.replace(new RegExp(/[ț]/g), "t");
-    return r;
+    if (s) {
+        var r = s.toLowerCase();
+        r = r.replace(new RegExp(/[âăî]/g), "a");
+        r = r.replace(new RegExp(/[şşș]/g), "s");
+        r = r.replace(new RegExp(/[ț]/g), "t");
+        return r;
+    }
+    return s;
 }
 exports.accentsTidy = accentsTidy;
 ;

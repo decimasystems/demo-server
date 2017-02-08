@@ -1,21 +1,16 @@
 "use strict";
-var http = require('http');
 var express = require("express");
 var bodyParser = require("body-parser");
-var fs = require('fs');
-var cors = require('cors');
+var companyRouter_1 = require("./companyRouter");
+var cors = require("cors");
 var app = express();
-var server = http.createServer(app);
-var convert_1 = require("./convert");
-var vect = new convert_1.Converter();
-var firme, file1, siruta;
-var routes = require('./routes');
 app.use(bodyParser.json());
 app.use(cors());
-app.all('*', function () {
+app.all('*', function (request, response, next) {
     console.log("All express");
+    next();
 });
-app.use('/api', routes);
+app.use("/company", companyRouter_1.companyRouter);
 /*app.use("/cards", cardRouter);
 app.use("/siruta", sirutaRouter);
 app.use('/company',companyRouter );*/
@@ -61,7 +56,7 @@ app.get('/companies/:id', (req, res) => {
         }
         res.json(company)
     })*/
-server.listen(4000, function () {
+var server = app.listen(4000, function () {
     console.log('rest service running on port 4000');
 });
 //# sourceMappingURL=index.js.map
