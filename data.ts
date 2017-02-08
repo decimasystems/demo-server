@@ -1,16 +1,17 @@
 import * as _ from 'lodash'
 import { Converter } from './convert'
-import {companiesPath,companiesProperties,companiesPath2,sirutaPath,sirutaProperties} from './config'
-export function importCompanies(companies:(y:any)=>any,callback:(x:any)=>any){ 
-    var firme,file1,siruta;
+import { Properties } from './config'
+export function importCompanies(companies: (y: any) => any, callback: (x: any) => any) {
+    var firme, file1;
     var vect = new Converter();
+    var properties = new Properties();
     var filter = (item) => {
         return true;
     }
     var indexCUI = [];
     var indexDenumire = [];
-    var firme1 = vect.csv2jsonPromise(companiesPath, companiesProperties, null, '|', filter);
-    var firme2 = vect.csv2jsonPromise(companiesPath2, companiesProperties, null, '|', filter);
+    var firme1 = vect.csv2jsonPromise(properties.companiesPath, properties.companiesProperties, null, '|', filter);
+    var firme2 = vect.csv2jsonPromise(properties.companiesPath2, properties.companiesProperties, null, '|', filter);
     Promise.all([firme1, firme2])
         .then((json) => {
             firme = json[0].concat(json[1]);
@@ -25,17 +26,11 @@ export function importCompanies(companies:(y:any)=>any,callback:(x:any)=>any){
         }).then((indexCUI) => {
             vect.writeFilePromise('./indexCui.json', JSON.stringify(indexCUI));
             vect.writeFilePromise('./indexDenumire.json', JSON.stringify(indexDenumire))
-        }).then(() => {
-           return vect.readFilePromise('./indexCui.json', 'utf-8')
-        }).then((json) => {
-            file1 = json;
-             callback(file1);
-        });
+        })
 
-    /*Promise.all([vect.writeFilePromise('./indexCui.json', JSON.stringify(indexCUI)),
-             vect.writeFilePromise('./indexDenumire.json', JSON.stringify(indexDenumire))])
-        .then(() => {
-            file1 = vect.readFilePromise('./indexCui.json', 'utf-8')
-        })*/
-    
+
+    vect.csv2jsonPromise(properties.sirutaPath, properties.sirutaProperties, null, null, filter)
+        .then((json) => {
+            callback(json);
+        })
 }
