@@ -1,31 +1,35 @@
-import * as express from 'express';
 import * as db from "./db";
-import { IdentityCard } from './db'
-module.exports =  (router: express.Router)=> {
-    router.get("/card", (req, res) => {
-        db.getCards((vector: IdentityCard[]) => {
-            res.json(vector);
-        });
-    })
-    router.get('/card/:cnp', (req, res) => {
-        db.getCard(req.params.cnp, (card: IdentityCard) => {
-            res.json(card);
-        });
-    })
-    router.post('/card', (req, res) => {
-        db.addCard(req.body, (card: IdentityCard) => {
-            res.json(card);
-        });
+import { IdentityCard } from './db';
+import { Router, Request, Response, NextFunction } from 'express';
+const cardRouter: Router = Router();
+cardRouter.all('*', (request: Request, response: Response, next: NextFunction) => {
+    next();
+})
+
+cardRouter.get("/card",  (request: Request, response: Response, next: NextFunction) => {
+    db.getCards((vector: IdentityCard[]) => {
+        response.json(vector);
     });
-    router.delete('/card/:cnp', (req, res) => {
-        db.deleteCard(req.params.cnp, (cnp) => {
-            res.json(cnp);
-        });
+})
+cardRouter.get('/card/:cnp',  (request: Request, response: Response, next: NextFunction) => {
+    db.getCard(request.params.cnp, (card: IdentityCard) => {
+        response.json(card);
     });
-    router.put('/card/:cnp', (req, res) => {
-        db.updateCard(req.params.cnp, req.body, (card: IdentityCard) => {
-            res.json(card);
-        });
-    })
-    
-}
+})
+cardRouter.post('/card',  (request: Request, response: Response, next: NextFunction) => {
+    db.addCard(request.body, (card: IdentityCard) => {
+        response.json(card);
+    });
+});
+cardRouter.delete('/card/:cnp',  (request: Request, response: Response, next: NextFunction) => {
+    db.deleteCard(request.params.cnp, (cnp) => {
+        response.json(cnp);
+    });
+});
+cardRouter.put('/card/:cnp',  (request: Request, response: Response, next: NextFunction) => {
+    db.updateCard(req.params.cnp, req.body, (card: IdentityCard) => {
+        res.json(card);
+    });
+})
+
+export { cardRouter }

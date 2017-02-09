@@ -1,30 +1,34 @@
 "use strict";
 var db = require("./db");
-module.exports = function (router) {
-    router.get("/card", function (req, res) {
-        db.getCards(function (vector) {
-            res.json(vector);
-        });
+var express_1 = require("express");
+var cardRouter = express_1.Router();
+exports.cardRouter = cardRouter;
+cardRouter.all('*', function (request, response, next) {
+    next();
+});
+cardRouter.get("/card", function (request, response, next) {
+    db.getCards(function (vector) {
+        response.json(vector);
     });
-    router.get('/card/:cnp', function (req, res) {
-        db.getCard(req.params.cnp, function (card) {
-            res.json(card);
-        });
+});
+cardRouter.get('/card/:cnp', function (request, response, next) {
+    db.getCard(request.params.cnp, function (card) {
+        response.json(card);
     });
-    router.post('/card', function (req, res) {
-        db.addCard(req.body, function (card) {
-            res.json(card);
-        });
+});
+cardRouter.post('/card', function (request, response, next) {
+    db.addCard(request.body, function (card) {
+        response.json(card);
     });
-    router.delete('/card/:cnp', function (req, res) {
-        db.deleteCard(req.params.cnp, function (cnp) {
-            res.json(cnp);
-        });
+});
+cardRouter.delete('/card/:cnp', function (request, response, next) {
+    db.deleteCard(request.params.cnp, function (cnp) {
+        response.json(cnp);
     });
-    router.put('/card/:cnp', function (req, res) {
-        db.updateCard(req.params.cnp, req.body, function (card) {
-            res.json(card);
-        });
+});
+cardRouter.put('/card/:cnp', function (request, response, next) {
+    db.updateCard(req.params.cnp, req.body, function (card) {
+        res.json(card);
     });
-};
+});
 //# sourceMappingURL=cardRouter.js.map
