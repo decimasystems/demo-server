@@ -27,8 +27,8 @@ cardRouter.delete('/card/:cnp', function (request, response, next) {
     });
 });
 cardRouter.put('/card/:cnp', function (request, response, next) {
-    db.updateCard(req.params.cnp, req.body, function (card) {
-        res.json(card);
+    db.updateCard(request.params.cnp, request.body, function (card) {
+        response.json(card);
     });
 });
 //# sourceMappingURL=cardRouter.js.map

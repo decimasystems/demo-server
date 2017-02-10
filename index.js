@@ -9,10 +9,8 @@ var app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.all('*', function (request, response, next) {
-    console.log("All express");
     next();
 });
-//app.use("/company", companyRouter);
 app.use("/firme", firmeRouter_1.firmeRouter);
 app.use("/siruta", sirutaRouter_1.sirutaRouter);
 app.use("/cards", cardRouter_1.cardRouter);

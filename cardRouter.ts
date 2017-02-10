@@ -27,8 +27,8 @@ cardRouter.delete('/card/:cnp',  (request: Request, response: Response, next: Ne
     });
 });
 cardRouter.put('/card/:cnp',  (request: Request, response: Response, next: NextFunction) => {
-    db.updateCard(req.params.cnp, req.body, (card: IdentityCard) => {
-        res.json(card);
+    db.updateCard(request.params.cnp, request.body, (card: IdentityCard) => {
+        response.json(card);
     });
 })
 

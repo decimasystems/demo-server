@@ -98,7 +98,7 @@ export function accentsTidy(s) {
     if (s) {
         var r = s.toLowerCase();
         r = r.replace(new RegExp(/[âăî]/g), "a");
-        r = r.replace(new RegExp(/[şşș]/g), "s");
+        r = r.replace(new RegExp(/[şşșş]/g), "s");
         r = r.replace(new RegExp(/[ț]/g), "t");
         return r;
     }

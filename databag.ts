@@ -1,7 +1,6 @@
 class InMemoryStore{
     public CuiIndex;
     public NameIndex;
-    public Siruta;
     public Companies;
 }
 
