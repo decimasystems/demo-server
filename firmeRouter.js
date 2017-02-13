@@ -4,9 +4,11 @@ var _ = require("lodash");
 var databag_1 = require("./databag");
 var convert_1 = require("./convert");
 var config_1 = require("./config");
-var convert_2 = require("./convert");
+var accentsTidy_1 = require("./accentsTidy");
+var shortName_1 = require("./shortName");
 var binarySearchString_1 = require("./binarySearchString");
 var binarySearch_1 = require("./binarySearch");
+var whiteSpaceSep_1 = require("./whiteSpaceSep");
 var firmeRouter = express_1.Router();
 exports.firmeRouter = firmeRouter;
 firmeRouter.all('*', function (request, response, next) {
@@ -26,34 +28,41 @@ firmeRouter.get('/index', function (request, response, next) {
         var x = json[0].concat(json[1]);
         var siruta = json[2];
         var judete = [];
-        for (var _i = 0, siruta_1 = siruta; _i < siruta_1.length; _i++) {
-            var s = siruta_1[_i];
-            s.denumireLoc = convert_2.accentsTidy(s.denumireLoc);
-            s.denumireLoc = convert_2.shortName(s.denumireLoc, s.TIP);
-            if (s.TIP == '40')
-                judete.push(s);
+        for (var i = 0; i < siruta.length; i++) {
+            siruta[i].denumireLoc = accentsTidy_1.accentsTidy(siruta[i].denumireLoc);
+            siruta[i].denumireLoc = shortName_1.shortName(siruta[i].denumireLoc, siruta[i].TIP);
+            siruta[i].denumireLoc = whiteSpaceSep_1.whiteSpaceSeparator(siruta[i].denumireLoc);
+            if (siruta[i].TIP == '40') {
+                // siruta[i].denumireLoc=accentsTidy(siruta[i].denumireLoc);
+                judete.push(siruta[i]);
+            }
         }
         var localitate = [];
-        for (var _a = 0, judete_1 = judete; _a < judete_1.length; _a++) {
-            var j = judete_1[_a];
-            for (var _b = 0, siruta_2 = siruta; _b < siruta_2.length; _b++) {
-                var s = siruta_2[_b];
-                if (j.judet == s.judet && s.TIP != '40')
+        for (var i = 0; i < judete.length; i++) {
+            for (var _i = 0, siruta_1 = siruta; _i < siruta_1.length; _i++) {
+                var s = siruta_1[_i];
+                if (judete[i].judet == s.judet && s.TIP != '40') {
                     localitate.push(s);
+                }
             }
-            j.localitati = _.sortBy(localitate, ["denumireLoc"]);
+            judete[i].localitati = _.sortBy(localitate, ["denumireLoc"]);
             localitate = [];
         }
         var sirute = _.sortBy(judete, ["denumireLoc"]);
-        for (var _c = 0, x_1 = x; _c < x_1.length; _c++) {
-            var company = x_1[_c];
-            var judet = binarySearchString_1.binarySearchString(sirute, convert_2.accentsTidy(company.JUDET), 'denumireLoc');
-            var localitati = judet.localitati;
-            var loc = binarySearchString_1.binarySearchString(localitati, convert_2.accentsTidy(company.LOCALITATE), 'denumireLoc');
-            company.sirutaJudet = judet.siruta;
-            company.sirutaLocalitate = loc.siruta;
+        for (var i = 0; i < x.length; i++) {
+            if (x[i].JUDET && x[i].LOCALITATE) {
+                var j = accentsTidy_1.accentsTidy(x[i].JUDET);
+                var judet = binarySearchString_1.binarySearchString(sirute, whiteSpaceSep_1.whiteSpaceSeparator(j), 'denumireLoc');
+                var localitati = judet.localitati;
+                var l = accentsTidy_1.accentsTidy(x[i].LOCALITATE);
+                var loc = binarySearchString_1.binarySearchString(localitati, whiteSpaceSep_1.whiteSpaceSeparator(l), 'denumireLoc');
+                x[i].sirutaJudet = judet.siruta;
+                x[i].sirutaLocalitate = loc.siruta;
+            }
+            console.log((i + 1) + "/" + x.length);
         }
         convert.writeFilePromise('./firme.json', JSON.stringify(x));
+        //response.json(x);
         return x;
     }).then(function (x) {
         var indexCui = [], indexDenumire = [];
@@ -65,6 +74,7 @@ firmeRouter.get('/index', function (request, response, next) {
         var namex = _.sortBy(indexDenumire, ['d']);
         convert.writeFilePromise('./indexCui.json', JSON.stringify(idx));
         convert.writeFilePromise('./indexDenumire.json', JSON.stringify(namex));
+        console.log("indexCui, nameIndex done");
         response.sendStatus(200);
     });
 });

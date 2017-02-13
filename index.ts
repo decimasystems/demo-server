@@ -6,7 +6,7 @@ import {firmeRouter} from './firmeRouter'
 import {sirutaRouter} from './sirutaRouter';
 import {cardRouter} from './cardRouter'
 import { binarySearch } from './binarySearch';
-import { accentsTidy } from './convert';
+import { accentsTidy } from './accentsTidy';
 import * as cors from 'cors';
 import { Converter } from './convert';
 

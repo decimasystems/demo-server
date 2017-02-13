@@ -5,10 +5,14 @@ function binarySearchString(vector, searchElement, indexedPropertyName) {
     min = 0;
     while (min <= max) {
         middle = Math.ceil((max + min) / 2);
-        if (vector[min][indexedPropertyName] == searchElement)
+        if (vector[min][indexedPropertyName].replace(/[âââ]/g, "a") == searchElement.replace(/[âââ]/g, "a")
+            || vector[min][indexedPropertyName].replace(/[âââ]/g, "i") == searchElement.replace(/[âââ]/g, "i")) {
             return vector[min];
-        else if (vector[max][indexedPropertyName] == searchElement)
+        }
+        else if (vector[max][indexedPropertyName].replace(/[âââ]/g, "a") == searchElement.replace(/[âââ]/g, "a")
+            || vector[max][indexedPropertyName].replace(/[âââ]/g, "i") == searchElement.replace(/[âââ]/g, "i")) {
             return vector[max];
+        }
         else {
             if (searchElement.localeCompare(vector[middle][indexedPropertyName]) == -1) {
                 if ((middle + min) / 2 == 1)

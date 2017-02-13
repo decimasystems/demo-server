@@ -94,26 +94,4 @@ export class Converter {
 
     }
 }
-export function accentsTidy(s) {
-    if (s) {
-        var r = s.toLowerCase();
-        r = r.replace(new RegExp(/[âăî]/g), "a");
-        r = r.replace(new RegExp(/[şşșş]/g), "s");
-        r = r.replace(new RegExp(/[ț]/g), "t");
-        return r;
-    }
-    return s;
-};
-export function shortName(denumireLoc,tip) {
-    if (tip == '40') {
-        denumireLoc = denumireLoc.split(' ');
-        if (denumireLoc.length == 3) {
-            denumireLoc = "" + denumireLoc[1] + " " + denumireLoc[2];
-        }
-        else {
-            denumireLoc = "" + denumireLoc[1];
-        }
 
-    }
-    return denumireLoc;
-}
