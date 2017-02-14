@@ -49,6 +49,13 @@ var Converter = (function () {
                     var line = lines[i];
                     if (line) {
                         var values = line.split(valueSeparator);
+                        if (values.length > properties.length) {
+                            values[0] = values[0].concat(values[1]);
+                            for (var index = 1; index < values.length - 1; index++) {
+                                values[index] = values[index + 1];
+                            }
+                            values.length = values.length - 1;
+                        }
                         for (var j = 0; j < properties.length; j++) {
                             var valKey = properties[j];
                             if ((/["]/g).test(values[j])) {

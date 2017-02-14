@@ -9,6 +9,7 @@ var shortName_1 = require("./shortName");
 var binarySearchString_1 = require("./binarySearchString");
 var binarySearch_1 = require("./binarySearch");
 var whiteSpaceSep_1 = require("./whiteSpaceSep");
+var search_1 = require("./search");
 var firmeRouter = express_1.Router();
 exports.firmeRouter = firmeRouter;
 firmeRouter.all('*', function (request, response, next) {
@@ -29,11 +30,11 @@ firmeRouter.get('/index', function (request, response, next) {
         var siruta = json[2];
         var judete = [];
         for (var i = 0; i < siruta.length; i++) {
-            siruta[i].denumireLoc = accentsTidy_1.accentsTidy(siruta[i].denumireLoc);
+            //siruta[i].denumireLoc = accentsTidy(siruta[i].denumireLoc);
             siruta[i].denumireLoc = shortName_1.shortName(siruta[i].denumireLoc, siruta[i].TIP);
             siruta[i].denumireLoc = whiteSpaceSep_1.whiteSpaceSeparator(siruta[i].denumireLoc);
             if (siruta[i].TIP == '40') {
-                // siruta[i].denumireLoc=accentsTidy(siruta[i].denumireLoc);
+                siruta[i].denumireLoc = accentsTidy_1.accentsTidy(siruta[i].denumireLoc);
                 judete.push(siruta[i]);
             }
         }
@@ -42,6 +43,15 @@ firmeRouter.get('/index', function (request, response, next) {
             for (var _i = 0, siruta_1 = siruta; _i < siruta_1.length; _i++) {
                 var s = siruta_1[_i];
                 if (judete[i].judet == s.judet && s.TIP != '40') {
+                    s.denumireLoc = accentsTidy_1.accentsTidy(s.denumireLoc);
+                    /*if (s.denumireLoc.charAt(0) == 'î') {
+                        s.denumireI = s.denumireLoc.charAt(0).replace(/[î]/, 'i');
+                        s.denumireA = s.denumireLoc;
+                    }
+                    else {
+                        s.denumireA = s.denumireLoc.replace(/[âââîî]/g, 'a');
+                        s.denumireI = s.denumireLoc.replace(/[âââîî]/g, 'i');
+                    }*/
                     localitate.push(s);
                 }
             }
@@ -55,7 +65,7 @@ firmeRouter.get('/index', function (request, response, next) {
                 var judet = binarySearchString_1.binarySearchString(sirute, whiteSpaceSep_1.whiteSpaceSeparator(j), 'denumireLoc');
                 var localitati = judet.localitati;
                 var l = accentsTidy_1.accentsTidy(x[i].LOCALITATE);
-                var loc = binarySearchString_1.binarySearchString(localitati, whiteSpaceSep_1.whiteSpaceSeparator(l), 'denumireLoc');
+                var loc = search_1.search(localitati, whiteSpaceSep_1.whiteSpaceSeparator(l), 'denumireLoc');
                 x[i].sirutaJudet = judet.siruta;
                 x[i].sirutaLocalitate = loc.siruta;
             }
