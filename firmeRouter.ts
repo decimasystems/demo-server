@@ -8,88 +8,58 @@ import { shortName } from './shortName';
 import { binarySearchString } from './binarySearchString';
 import { binarySearch } from './binarySearch';
 import { whiteSpaceSeparator } from './whiteSpaceSep';
-import {search} from './search';
+import { search } from './search';
+import { update } from './update';
 const firmeRouter: Router = Router();
 firmeRouter.all('*', (request: Request, response: Response, next: NextFunction) => {
-
     next();
 })
 
 firmeRouter.get('/index', (request: Request, response: Response, next: NextFunction) => {
     const convert = new Converter();
     const properties = new Properties();
-
     var filter = (item) => {
         return true;
     }
-    var file1 = convert.csv2jsonPromise(properties.companiesPath, properties.companiesProperties, null, '|', filter);
-    var file2 = convert.csv2jsonPromise(properties.companiesPath2, properties.companiesProperties, null, '|', filter);
-    var sirute = convert.csv2jsonPromise(properties.sirutaPath, properties.sirutaProperties, null, null, filter);
-    Promise.all([file1, file2, sirute])
+    Promise.all([convert.csv2jsonPromise(properties.companiesPath, properties.companiesProperties, null, '|', filter),
+    convert.csv2jsonPromise(properties.companiesPath2, properties.companiesProperties, null, '|', filter),
+    convert.csv2jsonPromise(properties.sirutaPath, properties.sirutaProperties, null, null, filter)])
         .then((json) => {
-            var x = json[0].concat(json[1])
+            var x = json[0];
+            var y = json[1];
             var siruta = json[2];
             var judete = [];
-            for (var i = 0; i < siruta.length; i++) {
-                //siruta[i].denumireLoc = accentsTidy(siruta[i].denumireLoc);
+            var indexCui = [], indexDenumire = [];
+            var localitatiN = [];
+            for (let i = 0; i < siruta.length; i++) {
                 siruta[i].denumireLoc = shortName(siruta[i].denumireLoc, siruta[i].TIP);
                 siruta[i].denumireLoc = whiteSpaceSeparator(siruta[i].denumireLoc);
                 if (siruta[i].TIP == '40') {
-                 
                     siruta[i].denumireLoc = accentsTidy(siruta[i].denumireLoc);
                     judete.push(siruta[i]);
                 }
-
             }
             var localitate = [];
-            for (var i = 0; i < judete.length; i++) {
+            for (let i = 0; i < judete.length; i++) {
                 for (let s of siruta) {
                     if (judete[i].judet == s.judet && s.TIP != '40') {
                         s.denumireLoc = accentsTidy(s.denumireLoc);
-                        /*if (s.denumireLoc.charAt(0) == 'î') {
-                            s.denumireI = s.denumireLoc.charAt(0).replace(/[î]/, 'i');
-                            s.denumireA = s.denumireLoc;
-                        }
-                        else {
-                            s.denumireA = s.denumireLoc.replace(/[âââîî]/g, 'a');
-                            s.denumireI = s.denumireLoc.replace(/[âââîî]/g, 'i');
-                        }*/
-
                         localitate.push(s);
                     }
-
                 }
                 judete[i].localitati = _.sortBy(localitate, ["denumireLoc"]);
                 localitate = [];
             }
-
-
             var sirute = _.sortBy(judete, ["denumireLoc"])
-            for (var i = 0; i < x.length; i++) {
-                if (x[i].JUDET && x[i].LOCALITATE) {
-                    var j = accentsTidy(x[i].JUDET)
-                    var judet = binarySearchString(sirute, whiteSpaceSeparator(j), 'denumireLoc');
-                    var localitati = judet.localitati;
-                    var l = accentsTidy(x[i].LOCALITATE);
-                    var loc = search(localitati, whiteSpaceSeparator(l), 'denumireLoc')
-                    x[i].sirutaJudet = judet.siruta;
-                    x[i].sirutaLocalitate = loc.siruta;
-                }
-                console.log((i + 1) + "/" + x.length);
-            }
-            convert.writeFilePromise('./firme.json', JSON.stringify(x));
-            //response.json(x);
-            return x
-        }).then((x) => {
-            var indexCui = [], indexDenumire = [];
-            for (let i = 0; i < x.length; i++) {
-                indexCui.push({ c: x[i].CUI, i: i });
-                indexDenumire.push({ d: x[i].DENUMIRE, i: i });
-            }
+            update(x, indexCui, indexDenumire, sirute, localitatiN);
+            update(y, indexCui, indexDenumire, sirute, localitatiN);
+            convert.writeFilePromise('./firme1.json', JSON.stringify(x));
+            convert.writeFilePromise('./firme2.json', JSON.stringify(y));
             var idx = _.sortBy(indexCui, ['c']);
             var namex = _.sortBy(indexDenumire, ['d']);
             convert.writeFilePromise('./indexCui.json', JSON.stringify(idx));
             convert.writeFilePromise('./indexDenumire.json', JSON.stringify(namex));
+            convert.writeFilePromise("./localitatiNegasite.json", JSON.stringify(localitatiN));
             console.log("indexCui, nameIndex done");
             response.sendStatus(200);
         })
@@ -99,21 +69,24 @@ firmeRouter.get('/store', (request: Request, response: Response, next: NextFunct
     var convert = new Converter();
     Promise.all([convert.readFilePromise('./indexCui.json', 'utf-8'),
     convert.readFilePromise('./indexDenumire.json', 'utf-8'),
-    convert.readFilePromise('./firme.json', 'utf-8')])
+    convert.readFilePromise('./firme1.json', 'utf-8'),
+    convert.readFilePromise('./firme2.json', 'utf-8')])
         .then((json: any) => {
-
             DataBag.CuiIndex = JSON.parse(json[0]);
             DataBag.NameIndex = JSON.parse(json[1]);
-            DataBag.Companies = JSON.parse(json[2]);
-
+            DataBag.Companies = _.union(JSON.parse(json[2]), JSON.parse(json[3]));
+            response.sendStatus(200);
         })
 
-    response.sendStatus(200);
 })
 firmeRouter.get('/company/:id', (request: Request, response: Response, next: NextFunction) => {
     var x = binarySearch(DataBag.CuiIndex, request.params.id, "c");
-    var company = DataBag.Companies[x.i];
+    if (x) {
+        var company = DataBag.Companies[x.i];
+        response.json(company);
+    }
+    else
+        response.sendStatus(404);
 
-    response.json(company);
 })
 export { firmeRouter };

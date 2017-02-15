@@ -5,7 +5,7 @@ export function search(vector, searchElement, indexedPropertyName) {
             || (vector[i][indexedPropertyName].length - searchElement.length == 1 && vector[i][indexedPropertyName].search(searchElement) >= 0)
             || (searchElement.length - vector[i][indexedPropertyName].length == 1 && searchElement.search(vector[i][indexedPropertyName]) >= 0))
             return vector[i];
-        else if (searchElement == "poiana galzii" && vector[i][indexedPropertyName] == "poiana galdei")
+        /*else if (searchElement == "poiana galzii" && vector[i][indexedPropertyName] == "poiana galdei")
             return vector[i];
         else if (searchElement == "vâlcan" && vector[i][indexedPropertyName] == "vulcan")
             return vector[i];
@@ -68,6 +68,8 @@ export function search(vector, searchElement, indexedPropertyName) {
         else if (searchElement == "fantinele" && vector[i][indexedPropertyName].replace(/[âââ]/g, "a") == "fantanele")
             return vector[i];
         else if (searchElement.replace(/[âââîî]/g, "i") == "costesti vilsan" && vector[i][indexedPropertyName].replace(/[âââîî]/g, "a") == "costesti vaslan")
-            return vector[i];
+            return vector[i];*/
+          //  else
+           // return;
     }
 }

@@ -9,7 +9,6 @@ import { binarySearch } from './binarySearch';
 import { accentsTidy } from './accentsTidy';
 import * as cors from 'cors';
 import { Converter } from './convert';
-
 const app = express();
 
 app.use(bodyParser.json());
