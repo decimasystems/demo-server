@@ -8,7 +8,7 @@ import { shortName } from './shortName';
 import { binarySearchString } from './binarySearchString';
 import { binarySearch } from './binarySearch';
 import { whiteSpaceSeparator } from './whiteSpaceSep';
-import { search } from './search';
+import {generateS} from './generateS';
 import { update } from './update';
 const firmeRouter: Router = Router();
 firmeRouter.all('*', (request: Request, response: Response, next: NextFunction) => {
@@ -43,7 +43,9 @@ firmeRouter.get('/index', (request: Request, response: Response, next: NextFunct
             for (let i = 0; i < judete.length; i++) {
                 for (let s of siruta) {
                     if (judete[i].judet == s.judet && s.TIP != '40') {
-                        s.denumireLoc = accentsTidy(s.denumireLoc);
+                        s.sinonime=generateS(s.denumireLoc);
+                       // s.denumireLoc = accentsTidy(s.denumireLoc);
+                       s.denumireLoc=s.denumireLoc.toLowerCase();
                         localitate.push(s);
                     }
                 }

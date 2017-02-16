@@ -14,16 +14,19 @@ function update(vector, vectorCui, vectorDenumire, sirute, negasit) {
             var judet = binarySearchString_1.binarySearchString(sirute, whiteSpaceSep_1.whiteSpaceSeparator(j), 'denumireLoc');
             var localitati = judet.localitati;
             var l = accentsTidy_1.accentsTidy(vector[i].LOCALITATE);
-            var loc = search_1.search(localitati, whiteSpaceSep_1.whiteSpaceSeparator(l), 'denumireLoc');
+            var loc;
+            if (search_1.searchSirutaCode(localitati, whiteSpaceSep_1.whiteSpaceSeparator(l), 'denumireLoc'))
+                loc = search_1.searchSirutaCode(localitati, whiteSpaceSep_1.whiteSpaceSeparator(l), 'denumireLoc');
+            else
+                loc = search_1.searchSirutaCode(localitati, whiteSpaceSep_1.whiteSpaceSeparator(l), 'sinonime');
             vector[i].sirutaJudet = judet.siruta;
-            if (loc) {
-                vector[i].sirutaLocalitate = loc.siruta;
-            }
-            else {
+            if (!loc) {
                 negasit.push(vector[i]);
-                continue;
             }
+            else
+                vector[i].sirutaLocalitate = loc.siruta;
         }
+        console.log(i + "/" + vector.length);
     }
 }
 exports.update = update;

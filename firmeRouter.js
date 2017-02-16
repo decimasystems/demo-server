@@ -8,6 +8,7 @@ var accentsTidy_1 = require("./accentsTidy");
 var shortName_1 = require("./shortName");
 var binarySearch_1 = require("./binarySearch");
 var whiteSpaceSep_1 = require("./whiteSpaceSep");
+var generateS_1 = require("./generateS");
 var update_1 = require("./update");
 var firmeRouter = express_1.Router();
 exports.firmeRouter = firmeRouter;
@@ -43,7 +44,9 @@ firmeRouter.get('/index', function (request, response, next) {
             for (var _i = 0, siruta_1 = siruta; _i < siruta_1.length; _i++) {
                 var s = siruta_1[_i];
                 if (judete[i].judet == s.judet && s.TIP != '40') {
-                    s.denumireLoc = accentsTidy_1.accentsTidy(s.denumireLoc);
+                    s.sinonime = generateS_1.generateS(s.denumireLoc);
+                    // s.denumireLoc = accentsTidy(s.denumireLoc);
+                    s.denumireLoc = s.denumireLoc.toLowerCase();
                     localitate.push(s);
                 }
             }
