@@ -83,4 +83,20 @@ function deleteCard(cnp, callback) {
     });
 }
 exports.deleteCard = deleteCard;
+function addCompany(company, callback) {
+    db.collection('companies', function (error, company_collection) {
+        if (error) {
+            console.error(error);
+            return;
+        }
+        company_collection.insertOne(company, function (err, companyObject) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            callback(company);
+        });
+    });
+}
+exports.addCompany = addCompany;
 //# sourceMappingURL=db.js.map

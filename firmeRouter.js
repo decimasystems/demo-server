@@ -1,6 +1,7 @@
 "use strict";
 var express_1 = require("express");
 var _ = require("lodash");
+var db = require("./db");
 var databag_1 = require("./databag");
 var convert_1 = require("./convert");
 var config_1 = require("./config");
@@ -84,9 +85,14 @@ firmeRouter.get('/company/:id', function (request, response, next) {
     var x = binarySearch_1.binarySearch(databag_1.DataBag.CuiIndex, request.params.id, "c");
     if (x) {
         var company = databag_1.DataBag.Companies[x.i];
-        response.json(company);
+        return response.json(company);
     }
     else
-        response.sendStatus(404);
+        return response.sendStatus(404);
+});
+firmeRouter.post("/companyUpdated", function (request, response, next) {
+    db.addCompany(request.body, function (company) {
+        return response.json(company);
+    });
 });
 //# sourceMappingURL=firmeRouter.js.map

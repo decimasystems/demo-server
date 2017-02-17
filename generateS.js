@@ -30,7 +30,7 @@ function generateS(denumire) {
                 sinonime.push(accentsTidy_1.accentsTidy(denumire).concat("u de beliu"));
             }
             sinonime.push(denumire.replace(/[şşșş]/, "ss"));
-            sinonime.push(accentsTidy_1.accentsTidy(denumire).replace("a", "o"));
+            sinonime.push(accentsTidy_1.accentsTidy(denumire).replace("o", "a"));
         }
         if (/oraș/.test(denumire)) {
             sinonime.push(denumire.substr(4, denumire.length));
@@ -48,8 +48,8 @@ function generateS(denumire) {
         if (/blej/.test(denumire)) {
             sinonime.push(accentsTidy_1.accentsTidy(denumire).replace(/blej/, "bej"));
         }
-        if (denumire.endsWith("ti")) {
-            sinonime.push(accentsTidy_1.accentsTidy(denumire).replace(/e[şşșş]ti/g, "eti"));
+        if (accentsTidy_1.accentsTidy(denumire).endsWith("esti")) {
+            sinonime.push(accentsTidy_1.accentsTidy(denumire).replace(/esti/, "eti"));
         }
         return sinonime;
     }

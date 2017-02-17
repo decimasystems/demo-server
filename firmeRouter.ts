@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as _ from 'lodash';
+import * as db from './db';
 import { DataBag } from './databag'
 import { Converter } from './convert';
 import { Properties } from './config';
@@ -8,7 +9,7 @@ import { shortName } from './shortName';
 import { binarySearchString } from './binarySearchString';
 import { binarySearch } from './binarySearch';
 import { whiteSpaceSeparator } from './whiteSpaceSep';
-import {generateS} from './generateS';
+import { generateS } from './generateS';
 import { update } from './update';
 const firmeRouter: Router = Router();
 firmeRouter.all('*', (request: Request, response: Response, next: NextFunction) => {
@@ -31,6 +32,7 @@ firmeRouter.get('/index', (request: Request, response: Response, next: NextFunct
             var judete = [];
             var indexCui = [], indexDenumire = [];
             var localitatiN = [];
+
             for (let i = 0; i < siruta.length; i++) {
                 siruta[i].denumireLoc = shortName(siruta[i].denumireLoc, siruta[i].TIP);
                 siruta[i].denumireLoc = whiteSpaceSeparator(siruta[i].denumireLoc);
@@ -43,9 +45,9 @@ firmeRouter.get('/index', (request: Request, response: Response, next: NextFunct
             for (let i = 0; i < judete.length; i++) {
                 for (let s of siruta) {
                     if (judete[i].judet == s.judet && s.TIP != '40') {
-                        s.sinonime=generateS(s.denumireLoc);
-                       // s.denumireLoc = accentsTidy(s.denumireLoc);
-                       s.denumireLoc=s.denumireLoc.toLowerCase();
+                        s.sinonime = generateS(s.denumireLoc);
+                        // s.denumireLoc = accentsTidy(s.denumireLoc);
+                        s.denumireLoc = s.denumireLoc.toLowerCase();
                         localitate.push(s);
                     }
                 }
@@ -85,10 +87,16 @@ firmeRouter.get('/company/:id', (request: Request, response: Response, next: Nex
     var x = binarySearch(DataBag.CuiIndex, request.params.id, "c");
     if (x) {
         var company = DataBag.Companies[x.i];
-        response.json(company);
+        return response.json(company);
     }
     else
-        response.sendStatus(404);
+        return response.sendStatus(404);
 
+})
+
+firmeRouter.post("/companyUpdated",(request:Request,response:Response,next:NextFunction)=>{
+    db.addCompany(request.body,(company)=>{
+        return response.json(company);
+    })
 })
 export { firmeRouter };

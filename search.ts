@@ -12,7 +12,7 @@ export function searchSirutaCode(vector, searchElement, indexedPropertyName) {
         else
             for (let index of vector[i][indexedPropertyName]) {
                 if (searchElement.replace(/[âââîî]/g, "i") == index || searchElement.replace(/[âââîî]/g, "a") == index || searchElement.search(index) >= 0 ||
-                    index.search(searchElement) >= 0 || searchElement == index)
+                    index.search(searchElement) >= 0 || searchElement == index || rez==index)
                     return vector[i]
             }
     }

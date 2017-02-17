@@ -14,7 +14,7 @@ function searchSirutaCode(vector, searchElement, indexedPropertyName) {
             for (var _i = 0, _a = vector[i][indexedPropertyName]; _i < _a.length; _i++) {
                 var index = _a[_i];
                 if (searchElement.replace(/[âââîî]/g, "i") == index || searchElement.replace(/[âââîî]/g, "a") == index || searchElement.search(index) >= 0 ||
-                    index.search(searchElement) >= 0 || searchElement == index)
+                    index.search(searchElement) >= 0 || searchElement == index || rez == index)
                     return vector[i];
             }
     }

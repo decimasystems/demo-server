@@ -4,6 +4,24 @@ var server = new mongodb.Server('localhost', 27017);
 var db = new mongodb.Db('mydb', server, { w: 1 });
 db.open(function () { });
 
+export interface Company {
+    denumire: string
+    CUI: string;
+    cod_inmatriculare: string;
+    stare_firma: string;
+    judet: string;
+    localitate: string;
+    sirutaJudet: string;
+    sirutaLocalitate: string;
+    street?: string;
+    streetNr: string;
+    block?: string;
+    entrance?: string;
+    floor?: string;
+    apartament?: string;
+    telephone: string;
+    email: string;
+}
 export interface IdentityCard {
     series: string;
     number: number;
@@ -99,6 +117,21 @@ export function deleteCard(cnp: string, callback: (cnp: string) => void) {
             callback(cnp);
         });
     });
+}
+export function addCompany(company: Company, callback: (company: Company) => void) {
+    db.collection('companies', (error, company_collection) => {
+        if (error) {
+            console.error(error);
+            return;
+        }
+        company_collection.insertOne(company, (err, companyObject) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            callback(company);
+        })
+    })
 }
 
 
