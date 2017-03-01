@@ -25,6 +25,7 @@ function update(vector, vectorCui, vectorDenumire, sirute, negasit) {
             }
             else
                 vector[i].sirutaLocalitate = loc.siruta;
+            vector[i].codJudet = loc.judet;
         }
         console.log(i + "/" + vector.length);
     }

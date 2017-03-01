@@ -1,4 +1,4 @@
-export function shortName(denumireLoc,tip) {
+export function shortName(denumireLoc, tip) {
     if (tip == '40') {
         denumireLoc = denumireLoc.split(' ');
         if (denumireLoc.length == 3) {

@@ -26,6 +26,5 @@ app.use("/cards", cardRouter);
 InitStore.load().then((_) => {
     const server = app.listen(4000, () => {
         console.log('rest service running on port 4000');
-        console.log("operating with "+_+" companies");
     })
 })

@@ -63,7 +63,7 @@ firmeRouter.get('/index', function (request, response, next) {
         var namex = _.sortBy(indexDenumire, ['d']);
         convert.writeFilePromise('./indexCui.json', JSON.stringify(idx));
         convert.writeFilePromise('./indexDenumire.json', JSON.stringify(namex));
-        convert.writeFilePromise("./localitatiNegasite.json", JSON.stringify(localitatiN));
+        //convert.writeFilePromise("./localitatiNegasite.json", JSON.stringify(localitatiN));
         console.log("indexCui, nameIndex done");
         response.sendStatus(200);
     });
@@ -88,10 +88,15 @@ firmeRouter.get('/company/:id', function (request, response, next) {
         return response.json(company);
     }
     else
-        return response.sendStatus(404);
+        response.sendStatus(404);
 });
 firmeRouter.post("/companyUpdated", function (request, response, next) {
     db.addCompany(request.body, function (company) {
+        response.json(company);
+    });
+});
+firmeRouter.get('/companyDb/:id', function (request, response, next) {
+    db.getCompany(request.params.id, function (company) {
         return response.json(company);
     });
 });

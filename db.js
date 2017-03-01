@@ -99,4 +99,20 @@ function addCompany(company, callback) {
     });
 }
 exports.addCompany = addCompany;
+function getCompany(cui, callback) {
+    db.collection('companies', function (error, company_collection) {
+        if (error) {
+            console.error(error);
+            return;
+        }
+        company_collection.findOne({ CUI: cui }, function (error, company) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            callback(company);
+        });
+    });
+}
+exports.getCompany = getCompany;
 //# sourceMappingURL=db.js.map

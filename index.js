@@ -18,7 +18,6 @@ app.use("/cards", cardRouter_1.cardRouter);
 init_1.InitStore.load().then(function (_) {
     var server = app.listen(4000, function () {
         console.log('rest service running on port 4000');
-        console.log("operating with " + _ + " companies");
     });
 });
 //# sourceMappingURL=index.js.map

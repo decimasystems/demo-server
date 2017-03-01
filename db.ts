@@ -134,4 +134,18 @@ export function addCompany(company: Company, callback: (company: Company) => voi
     })
 }
 
-
+export function getCompany(cui: string, callback: (company:Company) => void) {
+    db.collection('companies', (error, company_collection) => {
+        if (error) {
+            console.error(error);
+            return;
+        }
+        company_collection.findOne({ CUI:cui }, (error, company) => {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            callback(company);
+        });
+    });
+}

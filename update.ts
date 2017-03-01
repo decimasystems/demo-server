@@ -20,11 +20,13 @@ export function update(vector, vectorCui, vectorDenumire, sirute, negasit) {
             else
                 loc = searchSirutaCode(localitati, whiteSpaceSeparator(l), 'sinonime');
             vector[i].sirutaJudet = judet.siruta;
+            
             if (!loc) {
                 negasit.push(vector[i]);
             }
             else
                 vector[i].sirutaLocalitate = loc.siruta;
+                vector[i].codJudet=loc.judet;
         }
         console.log(i + "/" + vector.length);
     }

@@ -63,7 +63,7 @@ firmeRouter.get('/index', (request: Request, response: Response, next: NextFunct
             var namex = _.sortBy(indexDenumire, ['d']);
             convert.writeFilePromise('./indexCui.json', JSON.stringify(idx));
             convert.writeFilePromise('./indexDenumire.json', JSON.stringify(namex));
-            convert.writeFilePromise("./localitatiNegasite.json", JSON.stringify(localitatiN));
+            //convert.writeFilePromise("./localitatiNegasite.json", JSON.stringify(localitatiN));
             console.log("indexCui, nameIndex done");
             response.sendStatus(200);
         })
@@ -90,12 +90,17 @@ firmeRouter.get('/company/:id', (request: Request, response: Response, next: Nex
         return response.json(company);
     }
     else
-        return response.sendStatus(404);
+         response.sendStatus(404);
 
 })
 
 firmeRouter.post("/companyUpdated",(request:Request,response:Response,next:NextFunction)=>{
     db.addCompany(request.body,(company)=>{
+        response.json(company);
+    })
+})
+firmeRouter.get('/companyDb/:id',(request:Request,response:Response,next:NextFunction)=>{
+    db.getCompany(request.params.id,(company)=>{
         return response.json(company);
     })
 })
