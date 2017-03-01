@@ -63,7 +63,7 @@ firmeRouter.get('/index', function (request, response, next) {
         var namex = _.sortBy(indexDenumire, ['d']);
         convert.writeFilePromise('./indexCui.json', JSON.stringify(idx));
         convert.writeFilePromise('./indexDenumire.json', JSON.stringify(namex));
-        //convert.writeFilePromise("./localitatiNegasite.json", JSON.stringify(localitatiN));
+        convert.writeFilePromise("./localitatiNegasite.json", JSON.stringify(localitatiN));
         console.log("indexCui, nameIndex done");
         response.sendStatus(200);
     });
